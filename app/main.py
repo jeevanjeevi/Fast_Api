@@ -1,16 +1,22 @@
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Response,status
+from fastapi import FastAPI, HTTPException, Response,status, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
 from random import randint
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+from . import models
+from .database import engine, get_db
+from sqlalchemy.orm import Session
+
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 #connection to the database
-while True:
+'''while True:
      try:
           con = psycopg2.connect(host='localhost', database='fastmedia', user='postgres', password='postgres',cursor_factory=RealDictCursor,port=5433)
           cursor = con.cursor()
@@ -18,7 +24,7 @@ while True:
           break
      except Exception as e:
           print("database connection failed...",e)
-          #time.sleep(3)
+          #time.sleep(3)'''
 
 
 #List to store the posts
@@ -37,6 +43,10 @@ def find_index(id):
 @app.get("/")
 def root():
     return {"message":"welcome to fast api...!!!"}
+
+@app.get("/sqlalchemy")
+def root(db:Session=Depends(get_db)):
+    return {"message":"data base connection successful through sqlalchemy"}
 
 @app.get("/posts")
 def get_posts():
